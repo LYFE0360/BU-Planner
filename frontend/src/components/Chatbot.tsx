@@ -12,7 +12,7 @@ export default function Chatbot() {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'assistant',
-      content: 'Hi! I\'m your BU Course Planning assistant. I can help you find courses, plan your academic path, and answer questions about your degree. How can I help you today?'
+      content: 'Hi! I\'m your BU Course Planning assistant. I can help you navigate the website and answer questions about:\n\n📚 Finding and searching courses\n📅 Planning your semesters\n🎯 Getting career recommendations\n👨🏫 Researching professors\n\nWhat would you like help with?'
     }
   ])
   const [inputMessage, setInputMessage] = useState('')
@@ -47,19 +47,22 @@ export default function Chatbot() {
 
       const assistantMessage: Message = {
         role: 'assistant',
-        content: response.data.response
+        content: response.data.response || 'I received your message but had trouble generating a response. Could you rephrase your question?'
       }
 
       setMessages(prev => [...prev, assistantMessage])
     } catch (error: any) {
       console.error('Chatbot error:', error)
       
-      let errorContent = 'Sorry, I encountered an error. Please try again or contact support if the problem persists.'
+      let errorContent = "I'm having trouble connecting right now. But I can still help you navigate! Ask me about finding courses, planning semesters, career recommendations, or researching professors."
       
-      if (error.response?.status === 503 || error.response?.data?.detail?.includes('GOOGLE_API_KEY')) {
-        errorContent = '🔑 The AI chatbot requires a Google API key to function.\n\nTo enable the chatbot:\n1. Get a free API key from https://aistudio.google.com/app/apikey\n2. Add it to Replit Secrets as "GOOGLE_API_KEY"\n3. Restart the backend\n\nIn the meantime, I can still help you navigate the website! The site has 5 main sections:\n• Home - Overview and quick links\n• Explorer - Browse and search courses\n• Planner - Plan your semesters with drag-and-drop\n• Progress - Get AI career recommendations\n• Professors - Research faculty and their work\n\nWhat would you like to know about?'
-      } else if (error.response?.status === 404) {
-        errorContent = 'Sorry, I couldn\'t find information about that. Could you rephrase your question?'
+      // Check if it's a network error
+      if (!error.response) {
+        errorContent = "I couldn't connect to the server. Please check your internet connection and try again."
+      } else if (error.response?.status === 503) {
+        errorContent = "The AI service is temporarily unavailable. But I can still help you navigate the website! Ask me about the Explorer, Planner, Progress, or Professors pages."
+      } else if (error.response?.status === 500) {
+        errorContent = "I encountered an error processing your request. Could you try rephrasing your question? I can help with finding courses, planning semesters, or navigating the site."
       }
 
       const errorMessage: Message = {
