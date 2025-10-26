@@ -319,3 +319,43 @@ async def generate_professor_email(request: dict):
         "professor": professor_name,
         "research_areas": [c.get('display_name') for c in author_data.get('x_concepts', [])[:5]]
     }
+
+@router.post("/api/chatbot/")
+async def chatbot_conversation(request: dict):
+    """AI chatbot for course planning assistance"""
+    from app.ai_advisor import generate_ai_response
+    
+    user_message = request.get("message", "")
+    chat_history = request.get("history", [])
+    
+    if not user_message:
+        raise HTTPException(status_code=400, detail="Message is required")
+    
+    courses = get_all_courses()
+    course_count = len(courses)
+    
+    context = f"""You are an AI assistant for the BU Course Planner website. You help Boston University students with:
+- Finding courses that match their interests
+- Planning their academic path
+- Understanding prerequisites and course requirements
+- Career guidance and course recommendations
+- General academic advising
+
+The course catalog has {course_count} courses available.
+
+Previous conversation:
+{chr(10).join([f"{msg['role']}: {msg['content']}" for msg in chat_history[-5:]])}
+
+Current user question: {user_message}
+
+Provide helpful, concise, and friendly responses. If asked about specific courses, you can mention course codes like CS101, etc."""
+    
+    try:
+        response = await generate_ai_response(context)
+        return {
+            "response": response.get("result", ""),
+            "model": response.get("model", ""),
+            "message": user_message
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Chatbot error: {str(e)}")

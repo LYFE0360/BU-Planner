@@ -57,3 +57,8 @@ exposeLocalhost = true
 [[ports]]
 localPort = 46133
 externalPort = 3000
+
+[deployment]
+deploymentTarget = "vm"
+run = ["bash", "-c", "cd backend && uvicorn app.main:app --host 0.0.0.0 --port 8000 & cd ../frontend && npx serve -s dist -l 5000 -n"]
+build = ["bash", "-c", "cd frontend && npm install && npm run build && cd ../backend && pip install -r requirements.txt"]

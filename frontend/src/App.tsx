@@ -5,7 +5,8 @@ import Explorer from "./pages/Explorer";
 import Planner from "./pages/Planner";
 import Progress from "./pages/Progress";
 import AllProfessors from "./components/AllProfessors";
-import ProfessorDetails from "./components/ProfessorDetails"; // Import the correct component
+import ProfessorDetails from "./components/ProfessorDetails";
+import Chatbot from "./components/Chatbot";
 
 function App() {
   return (
@@ -17,10 +18,10 @@ function App() {
           <Route path="/planner" element={<Planner />} />
           <Route path="/progress" element={<Progress />} />
           <Route path="/professors" element={<AllProfessors />} />
-          {/* Change this to use ProfessorDetails */}
           <Route path="/professor/:name" element={<ProfessorDetails />} />
         </Routes>
       </Layout>
+      <Chatbot />
     </Router>
   );
 }
