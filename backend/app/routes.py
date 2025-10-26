@@ -334,21 +334,91 @@ async def chatbot_conversation(request: dict):
     courses = get_all_courses()
     course_count = len(courses)
     
-    context = f"""You are an AI assistant for the BU Course Planner website. You help Boston University students with:
-- Finding courses that match their interests
-- Planning their academic path
-- Understanding prerequisites and course requirements
-- Career guidance and course recommendations
-- General academic advising
+    website_knowledge = f"""
+WEBSITE STRUCTURE & NAVIGATION:
+The BU Course Planner has 5 main sections accessible from the top navigation bar:
 
-The course catalog has {course_count} courses available.
+1. HOME (/) - Landing page
+   - Overview of the application
+   - Quick links to all features
+   - "Browse Courses" button → goes to Explorer
+   - "Plan Your Semester" button → goes to Planner
+   - "Get AI Recommendations" button → goes to Progress
+   - "View Professors" button → goes to Professors page
+
+2. EXPLORER (/explorer) - Course Catalog Browser
+   - Search bar to search courses by name, code, or keywords
+   - Filter by department dropdown
+   - Filter by level (Introductory, Intermediate, Advanced, Graduate)
+   - Shows all {course_count} BU courses
+   - Click any course card to see full details in a modal
+
+3. PLANNER (/planner) - Semester Planning Tool
+   - Drag-and-drop interface for planning courses
+   - Add semesters with "Add Semester" button
+   - Drag courses from catalog to semester boards
+   - Export plan to PDF with "Export to PDF" button
+   - Visual prerequisite flow diagram
+   - Prerequisites are validated automatically
+
+4. PROGRESS (/progress) - AI Career Advisor
+   - Two modes: "Browse Career Paths" and "AI Custom Advisor"
+   - Browse preset career paths (Software Engineer, Data Scientist, etc.)
+   - OR enter ANY custom career goal for AI recommendations
+   - AI analyzes your goal and recommends optimal courses
+   - Shows skill coverage percentage
+   - Displays required skills for the career
+   - Click "Get Recommendations" to use AI (requires API key)
+
+5. PROFESSORS (/professors) - Professor Research
+   - Browse all BU professors
+   - Filter by department
+   - Click professor name to see research details
+   - View publications from OpenAlex
+   - Generate AI-powered cold emails to professors
+   - See research areas and collaborators
+
+FEATURES:
+✅ AI-Powered Career Recommendations - Get personalized course suggestions for ANY career goal
+✅ Course Search & Filtering - Find courses by department, level, keywords
+✅ Drag-and-Drop Planning - Visual semester planning interface
+✅ Prerequisite Validation - Automatic checking of course prerequisites
+✅ PDF Export - Download your semester plan
+✅ Professor Research - View professor publications and research areas
+✅ AI Cold Email Generator - Create professional emails to professors
+✅ This AI Chatbot - Get help navigating the site and planning courses
+
+HOW TO USE KEY FEATURES:
+- To plan a semester: Go to Planner → Add Semester → Drag courses from left sidebar
+- To search courses: Go to Explorer → Use search bar or filters
+- To get career advice: Go to Progress → Choose preset career OR enter custom goal → Click "Get Recommendations"
+- To research professors: Go to Professors → Click on a professor name
+- To export your plan: Go to Planner → Click "Export to PDF" button
+
+DATA AVAILABLE:
+- {course_count} BU courses from 2022 onwards
+- Course codes, titles, credits, levels, departments
+- Professor information with OpenAlex research data
+- AI-powered analysis using Google Gemini
+"""
+
+    context = f"""You are an AI assistant for the BU Course Planner website. You help Boston University students with course planning and navigating the website.
+
+{website_knowledge}
 
 Previous conversation:
 {chr(10).join([f"{msg['role']}: {msg['content']}" for msg in chat_history[-5:]])}
 
 Current user question: {user_message}
 
-Provide helpful, concise, and friendly responses. If asked about specific courses, you can mention course codes like CS101, etc."""
+INSTRUCTIONS:
+- Be helpful, friendly, and conversational
+- Give specific navigation directions (e.g., "Click on 'Planner' in the top menu")
+- If asked about location of features, reference the navigation structure above
+- Suggest relevant features based on user needs
+- Keep responses concise but informative
+- If asked about courses, mention specific course codes when relevant
+- Guide users to the right page for their needs"""
     
     try:
         response = await generate_ai_response(context)
@@ -357,5 +427,12 @@ Provide helpful, concise, and friendly responses. If asked about specific course
             "model": response.get("model", ""),
             "message": user_message
         }
+    except HTTPException as e:
+        if "GOOGLE_API_KEY" in str(e.detail):
+            raise HTTPException(
+                status_code=503,
+                detail="AI chatbot is not configured. The Google API key is missing. Please contact an administrator."
+            )
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Chatbot error: {str(e)}")

@@ -44,11 +44,14 @@ This is a full-stack web application that helps BU students:
 ## Key Features
 
 ### 1. AI Chatbot 🤖
-- Floating chat widget on all pages
+- Floating chat widget on all pages (bottom-right corner)
 - Powered by Google Gemini API
+- **Comprehensive website knowledge** - Can guide you to any feature
 - Helps with course planning, prerequisites, and academic advising
 - Maintains conversation history
-- Located in bottom-right corner of every page
+- Can navigate users to specific pages and features
+- Provides helpful fallback info even without API key configured
+- Smart error messages guide users to enable AI features
 
 ### 2. Course Catalog
 - Browse 1000+ BU courses
@@ -111,7 +114,9 @@ BU-Planner/
 - ✅ Updated backend CORS to allow all origins (Replit proxy)
 - ✅ Frontend API URL auto-detects Replit domains
 - ✅ Added AI chatbot feature with floating widget
-- ✅ Created /api/chatbot/ endpoint for AI conversations
+- ✅ Created /api/chatbot/ endpoint for AI conversations with website knowledge
+- ✅ Enhanced chatbot with comprehensive navigation and feature information
+- ✅ Improved error handling with helpful fallback messages
 - ✅ Integrated chatbot into all pages via App.tsx
 - ✅ Set up workflows for frontend and backend
 - ✅ Configured deployment settings
